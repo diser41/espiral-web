@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Espiral · Lecturas de cartas</title>
+<meta name="description" content="Lecturas de cartas para ver tu situación desde otro lugar. Puerto Montt, Maullín, Calbuco y videollamada.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js')</script>
+<style>
+:root{
+  --bg:#F4EEE3;--surface:#FBF7F0;--surface-2:#EEE7F6;--surface-alt:#EDE4D3;--line:#D9CDB8;
+  --text:#2A2420;--muted:#6B5E52;--accent:#6E5A9E;--accent-ink:#FFFFFF;
+  --wood:#2E2620;--wood-2:#3E3229;--cream:#F4EEE3;--cream-muted:#CDBFAE;--lav:#C3B3E6;--amber:#F2C98A;
+  --band-line:rgba(244,238,227,.22);--radius:6px;
+  --font-display:'Cormorant Garamond',serif;--font-body:'Karla',sans-serif;
+  --ease:cubic-bezier(.22,.8,.3,1);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{background:var(--bg) var(--grain);color:var(--text);font-family:var(--font-body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;position:relative}
+section{padding:104px 0;position:relative}
+h1,h2,h3,.logo{font-family:var(--font-display);font-weight:500;line-height:1.08}
+h1{font-size:clamp(46px,8vw,96px);max-width:12ch;font-style:italic;color:var(--cream)}
+h2{font-size:clamp(36px,5vw,58px);margin-bottom:12px}
+h3{font-size:clamp(23px,2.4vw,29px);margin-bottom:6px}
+h2 em{font-style:italic;color:var(--accent)}
+.eyebrow{text-transform:uppercase;letter-spacing:.28em;font-size:13px;font-weight:500;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:28px;height:1px;background:currentColor;opacity:.6}
+.muted,article p,.nota{color:var(--muted)}
+.sub{color:var(--muted);margin:-4px 0 36px;font-style:italic;font-family:var(--font-display);font-size:22px}
+
+/* ---------- reveal on scroll ---------- */
+.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:calc(var(--i,0)*110ms)}
+.js .reveal.in{opacity:1;transform:none}
+
+/* ---------- header ---------- */
+.top{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;gap:24px;padding:22px max(24px,calc((100vw - 1080px)/2 + 24px));color:var(--cream);background:var(--wood);border-bottom:1px solid var(--band-line);transition:padding .4s var(--ease),box-shadow .4s}
+.top.scrolled{padding-top:12px;padding-bottom:12px;box-shadow:0 10px 30px -14px rgba(0,0,0,.55)}
+.top .logo{font-size:30px;margin-right:auto;display:flex;align-items:center;gap:10px}
+.top .logo svg{width:26px;height:26px;transition:transform 1.2s var(--ease)}
+.top .logo:hover svg{transform:rotate(360deg)}
+.top nav{display:flex;gap:28px;font-size:15px}
+.top nav a{color:var(--cream-muted);position:relative;padding:4px 0}
+.top nav a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--lav);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.top nav a:hover,.top nav a.activo{color:var(--cream)}
+.top nav a.activo::after{transform:scaleX(1)}
+.top nav a:hover::after{transform:scaleX(1)}
+.btn{background:var(--lav);color:var(--text);border-radius:999px;font-weight:600;padding:9px 20px;font-size:14px;transition:background .3s,transform .3s}
+.btn:hover{background:#d4c8ef;transform:translateY(-1px)}
+
+/* ---------- hero ---------- */
+.hero{min-height:100vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 78% 30%,#4a3b2f,var(--wood) 62%);color:var(--cream);padding-top:120px}
+.hero .wrap{width:100%;z-index:2}
+.hero .wrap>*{animation:subir 1.1s var(--ease) backwards;animation-delay:calc(.25s + var(--i,0)*150ms)}
+@keyframes subir{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.lead{font-family:var(--font-display);font-style:italic;font-size:clamp(22px,2.6vw,28px);line-height:1.4;max-width:30ch;margin:26px 0 36px;color:var(--cream-muted)}
+.hero .eyebrow{color:var(--lav)}
+.chips{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.chips li{border:1px solid var(--band-line);border-radius:999px;padding:8px 20px;font-size:15px;transition:border-color .3s,background .3s}
+.chips li:hover{border-color:var(--lav);background:rgba(195,179,230,.08)}
+.cta{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 24px;background:var(--lav);color:var(--text);border-radius:var(--radius);padding:22px 30px;max-width:700px;font-weight:600;overflow:hidden;transition:transform .35s var(--ease),box-shadow .35s}
+.cta::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 5s ease-in-out 2.5s infinite}
+@keyframes brillo{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.cta:hover{transform:translateY(-3px);box-shadow:0 18px 40px -20px rgba(110,90,158,.9)}
+.cta strong{font-size:clamp(20px,2.6vw,28px);font-family:var(--font-display);font-weight:600;position:relative}
+.cta span{position:relative}
+
+/* spiral */
+.spiral{position:absolute;right:-90px;top:50%;width:min(680px,76vw);transform:translateY(-55%);pointer-events:none;z-index:1}
+.spiral .giro-lento{transform-box:view-box;transform-origin:200px 200px;animation:girar 120s linear infinite}
+.spiral path{fill:none;stroke:var(--lav);stroke-width:1.6;opacity:.75;stroke-dasharray:1;stroke-dashoffset:1;animation:dibujar 4.5s var(--ease) .4s forwards}
+.spiral circle{fill:var(--amber);transform-box:fill-box;transform-origin:center;animation:latido 4s ease-in-out infinite}
+@keyframes dibujar{to{stroke-dashoffset:0}}
+@keyframes girar{to{transform:rotate(360deg)}}
+@keyframes latido{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.5);opacity:.55}}
+
+/* candle light + dust */
+.luz{position:absolute;right:12%;top:38%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(242,201,138,.30),rgba(242,201,138,.08) 40%,transparent 68%);filter:blur(6px);z-index:0;animation:vela 3.2s ease-in-out infinite alternate;pointer-events:none}
+@keyframes vela{0%{opacity:.75;transform:scale(1)}25%{opacity:.95;transform:scale(1.04)}45%{opacity:.8;transform:scale(.98)}70%{opacity:1;transform:scale(1.06)}100%{opacity:.85;transform:scale(1.01)}}
+.mota{position:absolute;bottom:-10px;border-radius:50%;background:var(--amber);opacity:0;pointer-events:none;z-index:1;animation:flotar linear infinite;box-shadow:0 0 8px rgba(242,201,138,.8)}
+.mota.lav{background:var(--lav);box-shadow:0 0 8px rgba(195,179,230,.8)}
+@keyframes flotar{0%{opacity:0;transform:translate(0,0)}15%{opacity:.8}50%{transform:translate(var(--dx),-50vh)}85%{opacity:.5}100%{opacity:0;transform:translate(calc(var(--dx)*-.5),-100vh)}}
+.scroll-hint{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:22px;height:36px;border:1.5px solid var(--cream-muted);border-radius:12px;z-index:2;opacity:.7}
+.scroll-hint::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;margin-left:-1.5px;border-radius:2px;background:var(--cream);animation:rueda 2s ease-in-out infinite}
+@keyframes rueda{0%{opacity:0;transform:translateY(0)}40%{opacity:1}100%{opacity:0;transform:translateY(12px)}}
+
+/* ---------- ideas + mesa ---------- */
+.ideas{background:var(--surface-alt) var(--grain)}
+.mesa{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;margin:8px 0 56px;max-width:760px}
+.mesa p{font-family:var(--font-display);font-style:italic;font-size:clamp(24px,3vw,32px);line-height:1.3}
+.taza{width:110px;height:120px}
+.taza .vapor{fill:none;stroke:#9c8b78;stroke-width:2.2;stroke-linecap:round;opacity:0;animation:vapor 3.6s ease-in-out infinite}
+.taza .vapor:nth-of-type(2){animation-delay:1.2s}
+.taza .vapor:nth-of-type(3){animation-delay:2.4s}
+@keyframes vapor{0%{opacity:0;transform:translateY(8px)}30%{opacity:.8}100%{opacity:0;transform:translateY(-14px)}}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.grid3 article{padding-top:26px;border-top:1px dashed var(--accent)}
+.num{display:block;font-family:var(--font-display);font-style:italic;font-size:40px;color:var(--accent);margin-bottom:6px}
+
+/* ---------- precios ---------- */
+.precios{display:grid;gap:18px;margin-top:40px}
+.precio{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:28px 32px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:0 1px 0 var(--line),0 8px 22px -16px rgba(60,40,20,.4);transition:transform .45s var(--ease),box-shadow .45s,border-color .45s}
+.precio:hover{transform:translateY(-4px) rotate(-.25deg);box-shadow:0 1px 0 var(--line),0 22px 40px -22px rgba(60,40,20,.55);border-color:var(--accent)}
+.precio strong{font-family:var(--font-display);font-weight:600;font-size:clamp(34px,4.4vw,52px);color:var(--accent);white-space:nowrap}
+.precio.destacado{background:var(--surface-2);border-color:var(--accent)}
+.tag{position:absolute;top:-13px;left:28px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 14px;border-radius:999px;display:flex;gap:6px;align-items:center}
+.tag i{font-style:normal;display:inline-block;animation:girar 6s linear infinite}
+.nota{margin-top:18px;font-size:15px}
+
+/* ---------- temas (cartas que giran) ---------- */
+.temas{background:var(--surface-alt) var(--grain)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.carta{perspective:1000px;cursor:pointer;outline:none}
+.carta-in{display:grid;height:100%;min-height:178px;transition:transform .8s var(--ease);transform-style:preserve-3d}
+.cara{grid-area:1/1;padding:26px;border-radius:var(--radius);backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column}
+.frente{background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 22px -18px rgba(60,40,20,.5)}
+.frente h3{color:var(--accent)}
+.frente p{font-size:15px}
+.frente small{margin-top:auto;padding-top:14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a89a8a}
+.dorso{transform:rotateY(180deg);background:var(--wood);color:var(--cream);border:1px solid var(--wood-2);justify-content:center;position:relative;overflow:hidden}
+.dorso::before{content:"";position:absolute;inset:8px;border:1px solid rgba(195,179,230,.35);border-radius:3px}
+.dorso span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--lav);margin-bottom:8px}
+.dorso p{font-family:var(--font-display);font-style:italic;font-size:21px;line-height:1.3;color:var(--cream)}
+.carta.girada .carta-in{transform:rotateY(180deg)}
+@media (hover:hover){.carta:hover .carta-in,.carta:focus-visible .carta-in{transform:rotateY(180deg)}}
+.carta:focus-visible .frente{outline:2px solid var(--accent);outline-offset:3px}
+
+/* ---------- giro ---------- */
+.pares{list-style:none;margin-top:40px;display:grid;gap:16px}
+.pares li{display:grid;grid-template-columns:1fr auto 1.4fr;align-items:center;gap:22px;padding:22px 28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:0 8px 22px -18px rgba(60,40,20,.45)}
+.pares small{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#a89a8a;margin-bottom:4px}
+.pares .despues small{color:var(--accent)}
+.pares s{text-decoration:line-through;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;color:var(--muted)}
+.pares .flecha{color:var(--accent);font-size:26px;transition:opacity .6s var(--ease) calc(.6s + var(--i,0)*110ms),transform .6s var(--ease) calc(.6s + var(--i,0)*110ms)}
+.pares .nueva{display:block;font-family:var(--font-display);font-size:24px;line-height:1.25;color:var(--text)}
+.pares .despues{transition:opacity .8s var(--ease) calc(.9s + var(--i,0)*110ms),transform .8s var(--ease) calc(.9s + var(--i,0)*110ms)}
+/* estado inicial de la animación: solo con JS y antes de entrar en pantalla */
+.js .pares li:not(.in) .flecha{opacity:0;transform:translateX(-10px)}
+.js .pares li:not(.in) .despues{opacity:0;transform:translateX(-14px)}
+.js .pares li:not(.in) s{text-decoration-color:transparent}
+.pares s{transition:text-decoration-color .6s ease calc(.3s + var(--i,0)*110ms)}
+
+/* ---------- reserva ---------- */
+.reserva{background:radial-gradient(ellipse at 15% 0%,#46382c,var(--wood) 55%);color:var(--cream);overflow:hidden}
+.reserva h2{color:var(--cream)}
+.reserva .eyebrow{color:var(--lav)}
+.reserva p{color:var(--cream-muted)}
+.pasos{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:34px 48px;margin:44px 0 48px}
+.pasos li{display:flex;gap:22px}
+.pasos .n{font-family:var(--font-display);font-style:italic;font-size:64px;line-height:.85;color:var(--lav);min-width:44px}
+.pasos h3{font-family:var(--font-body);font-weight:700;font-size:20px;color:var(--cream)}
+.reserva .cta{max-width:none;padding:26px 36px}
+.reserva .cta span{font-size:17px}
+.reserva .spiral-mini{position:absolute;left:-120px;bottom:-140px;width:420px;opacity:.18;pointer-events:none}
+.reserva .spiral-mini path{fill:none;stroke:var(--lav);stroke-width:2}
+.reserva .spiral-mini g{transform-box:view-box;transform-origin:200px 200px;animation:girar 160s linear infinite reverse}
+
+.pie{padding:34px 0;background:var(--wood);color:var(--cream-muted);font-size:14px;border-top:1px solid var(--band-line)}
+.pie-fila{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pie .logo{display:flex;align-items:center;gap:10px}
+.pie .logo svg{width:22px;height:22px;transition:transform 1.2s var(--ease)}
+.pie .logo:hover svg{transform:rotate(360deg)}
+.pie .aviso{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--band-line);font-size:13px;line-height:1.6;color:var(--cream-muted)}
+.pie .aviso strong{color:var(--cream);font-weight:700}
+.pie .logo{font-size:24px;color:var(--cream)}
+
+/* ---------- floating whatsapp ---------- */
+.flotante{position:fixed;right:20px;bottom:20px;z-index:30;display:flex;align-items:center;gap:10px;background:var(--accent);color:#fff;padding:12px 20px 12px 14px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 14px 30px -12px rgba(46,38,32,.7);opacity:0;transform:translateY(20px) scale(.95);pointer-events:none;transition:all .5s var(--ease)}
+.flotante.visible{opacity:1;transform:none;pointer-events:auto}
+.flotante:hover{background:#5d4b8a}
+.flotante .punto{position:relative;width:10px;height:10px;border-radius:50%;background:var(--amber)}
+.flotante .punto::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--amber);animation:onda 2s ease-out infinite}
+@keyframes onda{to{transform:scale(3);opacity:0}}
+
+@media (max-width:860px){
+  .grid3{grid-template-columns:1fr}
+  .grid4{grid-template-columns:repeat(2,1fr)}
+  .pasos{grid-template-columns:1fr}
+  .top nav{display:none}
+  .luz{right:-20%;width:380px;height:380px}
+}
+@media (max-width:560px){
+  section{padding:76px 0}
+  .wrap{padding:0 16px}
+  .top{padding-left:16px;padding-right:16px}
+  .grid4{grid-template-columns:1fr}
+  .precio{flex-direction:column;align-items:flex-start;padding:24px}
+  .pares li{grid-template-columns:1fr;gap:6px}
+  .pares .flecha{display:none}
+  .mesa{grid-template-columns:1fr}
+  .taza{width:80px;height:90px}
+  .cta,.reserva .cta{padding:18px 20px;flex-direction:column;align-items:flex-start}
+  .flotante .txt{display:none}
+  .flotante{padding:14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js .reveal,.pares span.nueva,.pares .flecha{opacity:1;transform:none}
+  .pares s::after{transform:scaleX(1)}
+  .spiral path{stroke-dashoffset:0}
+  .mota{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <a class="logo" href="#">
+    <svg viewBox="0 0 400 400" aria-hidden="true"><path d="M200 200 a12 12 0 0 1 24 0 a24 24 0 0 1 -48 0 a40 40 0 0 1 80 0 a60 60 0 0 1 -120 0 a86 86 0 0 1 172 0 a116 116 0 0 1 -232 0" fill="none" stroke="#C3B3E6" stroke-width="18" stroke-linecap="round"/></svg>
+    Espiral
+  </a>
+  <nav>
+    <a href="#lecturas">Lecturas</a>
+    <a href="#temas">Temas</a>
+    <a href="#reserva">Reserva</a>
+  </nav>
+  <a class="btn" href="https://wa.me/56964222825" target="_blank" rel="noopener">WhatsApp</a>
+</header>
+
+<section class="hero" id="hero">
+  <div class="luz" aria-hidden="true"></div>
+  <svg class="spiral" viewBox="0 0 400 400" aria-hidden="true">
+    <g class="giro-lento">
+      <path pathLength="1" d="M200 200 a12 12 0 0 1 24 0 a24 24 0 0 1 -48 0 a40 40 0 0 1 80 0 a60 60 0 0 1 -120 0 a86 86 0 0 1 172 0 a116 116 0 0 1 -232 0 a150 150 0 0 1 300 0"/>
+      <circle cx="200" cy="200" r="6"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <p class="eyebrow" style="--i:0">Lecturas de cartas</p>
+    <h1 style="--i:1">Tu pregunta, vista desde otro lugar.</h1>
+    <p class="lead" style="--i:2">No predigo tu futuro. Te ayudo a ver lo que hoy no estás viendo y qué puedes hacer con eso.</p>
+    <ul class="chips" style="--i:3"><li>Puerto Montt</li><li>Maullín</li><li>Calbuco</li><li>Videollamada</li></ul>
+    <a class="cta" style="--i:4" href="https://wa.me/56964222825" target="_blank" rel="noopener">
+      <span>Agenda por WhatsApp</span><strong>+56 9 6422 2825</strong>
+    </a>
+  </div>
+  <a class="scroll-hint" href="#como" aria-label="Seguir bajando"></a>
+</section>
+
+<section class="ideas" id="como">
+  <div class="wrap">
+    <div class="mesa reveal">
+      <svg class="taza" viewBox="0 0 110 120" aria-hidden="true">
+        <path class="vapor" d="M40 44 c-8 -8 8 -14 0 -24"/>
+        <path class="vapor" d="M56 44 c-8 -8 8 -14 0 -24"/>
+        <path class="vapor" d="M72 44 c-8 -8 8 -14 0 -24"/>
+        <path d="M22 54 h70 v18 a35 35 0 0 1 -70 0 z" fill="#6E5A9E"/>
+        <path d="M92 60 a12 12 0 0 1 0 24 h-4" fill="none" stroke="#6E5A9E" stroke-width="6"/>
+        <ellipse cx="57" cy="54" rx="35" ry="5" fill="#8a76b8"/>
+        <ellipse cx="57" cy="110" rx="46" ry="6" fill="#D9CDB8"/>
+      </svg>
+      <p>La mesa, algo caliente, las cartas, tu cuaderno.<br>Un momento para detenerte y conversar sin apuro.</p>
+    </div>
+    <p class="eyebrow reveal">Cómo trabajo</p>
+    <h2 class="reveal">Una conversación con cartas</h2>
+    <div class="grid3" style="margin-top:36px">
+      <article class="reveal" style="--i:0"><span class="num">1</span><h3>La pregunta mira hacia ti</h3><p>Tú eres quien puede actuar. Al empezar, afinamos la pregunta para que de verdad te sirva.</p></article>
+      <article class="reveal" style="--i:1"><span class="num">2</span><h3>Es un diálogo</h3><p>Tú también interpretas las cartas. En cada una te pregunto: ¿qué te hace sentido de esto?</p></article>
+      <article class="reveal" style="--i:2"><span class="num">3</span><h3>Te llevas algo concreto</h3><p>Cada lectura cierra con un gesto de cuidado para tu semana.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="lecturas" class="lecturas">
+  <div class="wrap">
+    <p class="eyebrow reveal">Lecturas</p>
+    <h2 class="reveal">Elige tu <em>lectura.</em></h2>
+    <p class="sub reveal">Tres formas de mirar tu situación. Presencial o a distancia.</p>
+    <div class="precios">
+      <article class="precio reveal" style="--i:0">
+        <div><h3>Lectura express</h3><p>3 cartas · una pregunta puntual · 20 min</p></div>
+        <strong>$7.000</strong>
+      </article>
+      <article class="precio destacado reveal" style="--i:1">
+        <span class="tag"><i>✦</i> La más pedida</span>
+        <div><h3>Análisis de un tema</h3><p>7 cartas · amor, trabajo, familia, estudios… · 45 a 60 min</p></div>
+        <strong>$15.000</strong>
+      </article>
+      <article class="precio reveal" style="--i:2">
+        <div><h3>Lectura profunda</h3><p>Varios temas + resumen escrito · hasta 90 min</p></div>
+        <strong>$25.000</strong>
+      </article>
+    </div>
+    <p class="nota reveal">Presencial, por videollamada o con audios por WhatsApp. Mismo precio.</p>
+  </div>
+</section>
+
+<section id="temas" class="temas">
+  <div class="wrap">
+    <p class="eyebrow reveal">Temas</p>
+    <h2 class="reveal">¿Qué te gustaría mirar?</h2>
+    <p class="sub reveal">Cada tema tiene su propia tirada. Da vuelta una carta.</p>
+    <div class="grid4">
+      <div class="carta reveal" style="--i:0" tabindex="0" role="button" aria-label="Amor: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Amor</h3><p>Lo que necesito y no pido</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué estás cultivando en tus relaciones?</p></div></div></div>
+      <div class="carta reveal" style="--i:1" tabindex="0" role="button" aria-label="Familia: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Familia</h3><p>Lo que heredé y lo que depende de mí</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué te gustaría que fuera distinto?</p></div></div></div>
+      <div class="carta reveal" style="--i:2" tabindex="0" role="button" aria-label="Trabajo: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Trabajo</h3><p>Lo que me desgasta y mi talento</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Cómo te sientes al empezar la semana?</p></div></div></div>
+      <div class="carta reveal" style="--i:3" tabindex="0" role="button" aria-label="Cambio laboral: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Cambio laboral</h3><p>Desde dónde busco y el primer paso</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué te da miedo soltar?</p></div></div></div>
+      <div class="carta reveal" style="--i:0" tabindex="0" role="button" aria-label="Estudios: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Estudios</h3><p>Lo que me dispersa y para qué estudio</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué se te hace cuesta arriba?</p></div></div></div>
+      <div class="carta reveal" style="--i:1" tabindex="0" role="button" aria-label="Nuevos comienzos: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Nuevos comienzos</h3><p>Cómo estoy empezando algo</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué necesita este comienzo para crecer?</p></div></div></div>
+      <div class="carta reveal" style="--i:2" tabindex="0" role="button" aria-label="Decisión: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Decisión</h3><p>Lo que apoya y frena cada camino</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué te mueve realmente a elegir?</p></div></div></div>
+      <div class="carta reveal" style="--i:3" tabindex="0" role="button" aria-label="Chakras: ver pregunta"><div class="carta-in">
+        <div class="cara frente"><h3>Chakras</h3><p>Un chequeo de tu energía</p><small>Girar ↻</small></div>
+        <div class="cara dorso"><span>Para empezar</span><p>¿Qué necesitas decir y expresar hoy?</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="giro">
+  <div class="wrap">
+    <p class="eyebrow reveal">El giro</p>
+    <h2 class="reveal">Cambia la pregunta, cambia lo que ves</h2>
+    <ul class="pares">
+      <li class="reveal" style="--i:0"><div class="antes"><small>En vez de</small><s>¿Me van a echar?</s></div><span class="flecha">→</span><div class="despues"><small>Prueba con</small><span class="nueva">¿Qué necesito entender de mi situación laboral?</span></div></li>
+      <li class="reveal" style="--i:1"><div class="antes"><small>En vez de</small><s>¿Qué siente él por mí?</s></div><span class="flecha">→</span><div class="despues"><small>Prueba con</small><span class="nueva">¿Qué busco yo en este vínculo?</span></div></li>
+      <li class="reveal" style="--i:2"><div class="antes"><small>En vez de</small><s>¿Me voy a mudar?</s></div><span class="flecha">→</span><div class="despues"><small>Prueba con</small><span class="nueva">¿Qué pasa si me quedo y qué pasa si me voy?</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<section id="reserva" class="reserva">
+  <svg class="spiral-mini" viewBox="0 0 400 400" aria-hidden="true"><g><path d="M200 200 a12 12 0 0 1 24 0 a24 24 0 0 1 -48 0 a40 40 0 0 1 80 0 a60 60 0 0 1 -120 0 a86 86 0 0 1 172 0 a116 116 0 0 1 -232 0 a150 150 0 0 1 300 0"/></g></svg>
+  <div class="wrap">
+    <p class="eyebrow reveal">Reserva</p>
+    <h2 class="reveal">Cómo reservar tu hora</h2>
+    <ol class="pasos">
+      <li class="reveal" style="--i:0"><span class="n">1</span><div><h3>Escríbeme por WhatsApp</h3><p>+56 9 6422 2825</p></div></li>
+      <li class="reveal" style="--i:1"><span class="n">2</span><div><h3>Elige lectura, tema y lugar</h3><p>Puerto Montt, Maullín, Calbuco o videollamada</p></div></li>
+      <li class="reveal" style="--i:2"><span class="n">3</span><div><h3>Confirma con transferencia</h3><p>Te envío los datos por WhatsApp</p></div></li>
+      <li class="reveal" style="--i:3"><span class="n">4</span><div><h3>Trae tu pregunta</h3><p>La afinamos al empezar la sesión</p></div></li>
+    </ol>
+    <a class="cta reveal" href="https://wa.me/56964222825" target="_blank" rel="noopener">
+      <span>Cuéntame tu tema</span><strong>WhatsApp +56 9 6422 2825</strong>
+    </a>
+  </div>
+</section>
+
+<footer class="pie">
+  <div class="wrap">
+    <p class="aviso"><strong>Solo mayores de 18 años.</strong> Las lecturas acompañan, no reemplazan terapia ni asesoría médica, legal o financiera.</p>
+    <div class="pie-fila">
+      <span class="logo">
+        <svg viewBox="0 0 400 400" aria-hidden="true"><path d="M200 200 a12 12 0 0 1 24 0 a24 24 0 0 1 -48 0 a40 40 0 0 1 80 0 a60 60 0 0 1 -120 0 a86 86 0 0 1 172 0 a116 116 0 0 1 -232 0" fill="none" stroke="#C3B3E6" stroke-width="18" stroke-linecap="round"/></svg>
+        Espiral
+      </span>
+      <span>Puerto Montt · Maullín · Calbuco · Online</span>
+    </div>
+  </div>
+</footer>
+
+<a class="flotante" id="flotante" href="https://wa.me/56964222825" target="_blank" rel="noopener" aria-label="Agenda por WhatsApp">
+  <span class="punto"></span><span class="txt">Agenda tu hora</span>
+</a>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Aparición al hacer scroll
+  var els = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !reduce) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          var el = e.target;
+          el.classList.add('in');
+          io.unobserve(el);
+          // al terminar de aparecer, liberar la transformación para que funcionen los hover
+          el.addEventListener('transitionend', function done(ev){
+            if (ev.target === el && ev.propertyName === 'transform') {
+              el.classList.remove('reveal');
+              el.removeEventListener('transitionend', done);
+            }
+          });
+        }
+      });
+    }, {threshold: .15, rootMargin: '0px 0px -40px 0px'});
+    els.forEach(function(el){ io.observe(el); });
+  } else {
+    els.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  // Motas de luz flotando en la portada
+  var hero = document.getElementById('hero');
+  if (!reduce) {
+    for (var i = 0; i < 22; i++) {
+      var m = document.createElement('span');
+      var s = 2 + Math.random() * 4;
+      m.className = 'mota' + (Math.random() < .4 ? ' lav' : '');
+      m.style.cssText = 'left:' + (Math.random() * 100) + '%;width:' + s + 'px;height:' + s + 'px;' +
+        'animation-duration:' + (12 + Math.random() * 14) + 's;animation-delay:-' + (Math.random() * 20) + 's;' +
+        '--dx:' + (Math.random() * 80 - 40) + 'px';
+      hero.appendChild(m);
+    }
+  }
+
+  // Encabezado y botón flotante según el scroll
+  var top = document.getElementById('top');
+  var flot = document.getElementById('flotante');
+  var reserva = document.getElementById('reserva');
+  function onScroll(){
+    var y = window.scrollY;
+    top.classList.toggle('scrolled', y > 40);
+    var r = reserva.getBoundingClientRect();
+    var enReserva = r.top < window.innerHeight * .6 && r.bottom > 0;
+    flot.classList.toggle('visible', y > window.innerHeight * .8 && !enReserva);
+  }
+  window.addEventListener('scroll', onScroll, {passive: true});
+  onScroll();
+
+  // Menú: ir a la sección con desplazamiento suave, descontando el encabezado
+  var navLinks = document.querySelectorAll('.top nav a[href^="#"], .scroll-hint');
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      var destino = document.querySelector(a.getAttribute('href'));
+      if (!destino) return;
+      e.preventDefault();
+      var y = destino.getBoundingClientRect().top + window.scrollY - (top.offsetHeight - 10);
+      window.scrollTo({top: y, behavior: reduce ? 'auto' : 'smooth'});
+      history.replaceState(null, '', a.getAttribute('href'));
+    });
+  });
+
+  // Menú: marcar la sección en la que estás
+  var menu = document.querySelectorAll('.top nav a');
+  function marcarActivo(){
+    var actual = null;
+    menu.forEach(function(a){
+      var s = document.querySelector(a.getAttribute('href'));
+      if (s && s.getBoundingClientRect().top <= window.innerHeight * .4) actual = a;
+    });
+    menu.forEach(function(a){ a.classList.toggle('activo', a === actual); });
+  }
+  window.addEventListener('scroll', marcarActivo, {passive: true});
+  marcarActivo();
+
+  // Cartas: tocar o Enter para girar
+  document.querySelectorAll('.carta').forEach(function(c){
+    function toggle(){ c.classList.toggle('girada'); }
+    c.addEventListener('click', toggle);
+    c.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
