@@ -46,9 +46,8 @@ jobs:
     name: Sitio (S3 + CloudFront)
     needs: infra
     runs-on: ubuntu-latest
-    environment:
-      name: produccion
-      url: https://lecturasespiral.com
+    # Sin "environment": cambiaría el claim sub del token OIDC
+    # (…:environment:<nombre>) y el rol de AWS solo confía en la rama main.
     steps:
       - uses: actions/checkout@v7
 
