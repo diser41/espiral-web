@@ -179,6 +179,29 @@ Cada vez que subas cambios a `main`, la página publicada se actualiza sola.
 
 Para usar un dominio propio (por ejemplo `espiral.cl`), se configura en la misma pantalla, en **Custom domain**.
 
+## Publicar en lecturasespiral.com (AWS CloudFront)
+
+El sitio se publica en **https://lecturasespiral.com** con S3 + CloudFront.
+
+Todo se despliega solo con GitHub Actions (`.github/workflows/deploy.yml`) en cada `push` a `main`, o a mano desde **Actions** → *Deploy a CloudFront* → *Run workflow*. El workflow tiene dos pasos:
+
+1. **Infraestructura:** aplica `infra/cloudfront.yml` (CloudFormation, región `us-east-1`): bucket S3 privado, CloudFront, certificado SSL, DNS en Route 53 (`www` redirige al dominio principal) y el rol que sube el sitio. Si la plantilla no cambió, no hace nada.
+2. **Sitio:** sube `index.html` a S3 y limpia la caché de CloudFront.
+
+GitHub se autentica en AWS con OIDC: no hay llaves guardadas. Solo la rama `main` de este repo puede asumir los roles.
+
+### Permisos (`infra/bootstrap.yml`)
+
+Esta plantilla define qué puede hacer GitHub Actions en AWS, por eso **no** la aplica Actions (si pudiera, un push podría darse más permisos). Se aplica a mano, solo cuando cambia:
+
+```bash
+aws cloudformation deploy --region us-east-1 --profile fgoyeneche --stack-name espiral-web-bootstrap --template-file infra/bootstrap.yml --capabilities CAPABILITY_NAMED_IAM
+```
+
+- `espiral-web-github-infra`: lo asume Actions; solo puede operar el stack `espiral-web`.
+- `espiral-web-cfn-exec`: lo usa CloudFormation para crear los recursos; limitado a S3 del sitio, CloudFront, ACM, la zona DNS del dominio y el rol de despliegue.
+- `espiral-web-deploy-boundary`: tope de permisos del rol que sube el sitio (S3 + invalidar caché).
+
 ## Subir cambios
 
 La conexión con GitHub usa una llave SSH (`~/.ssh/id_ed25519`), registrada en la cuenta **diser41**.

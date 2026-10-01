@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Espiral - permisos para que GitHub Actions aplique el stack espiral-web. Se aplica A MANO, nunca desde Actions.
+
+# Este stack define quien puede cambiar la infraestructura. Si Actions pudiera
+# modificarlo, un push a main podria darse permisos de administrador. Por eso
+# vive aparte y se despliega solo con el perfil local:
+#   aws cloudformation deploy --region us-east-1 --profile fgoyeneche \
+#     --stack-name espiral-web-bootstrap --template-file infra/bootstrap.yml \
+#     --capabilities CAPABILITY_NAMED_IAM
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: lecturasespiral.com
+  HostedZoneId:
+    Type: String
+    Default: Z08065052K5ORA3XZXCN6
+  GitHubRepo:
+    Type: String
+    Default: diser41/espiral-web
+  SiteStackName:
+    Type: String
+    Default: espiral-web
+
+Resources:
+  # Tope de permisos para el rol que sube el sitio (espiral-web-github-deploy).
+  # Aunque el template del sitio le agregue mas politicas, nunca podra pasar de esto.
+  DeployRoleBoundary:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "${SiteStackName}-deploy-boundary"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub "arn:aws:s3:::${DomainName}-site-${AWS::AccountId}"
+          - Effect: Allow
+            Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+            Resource: !Sub "arn:aws:s3:::${DomainName}-site-${AWS::AccountId}/*"
+          - Effect: Allow
+            Action: [cloudfront:CreateInvalidation, cloudfront:GetInvalidation]
+            Resource: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/*"
+          - Effect: Allow
+            Action: cloudformation:DescribeStacks
+            Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${SiteStackName}/*"
+
+  # Rol que usa CloudFormation para crear/cambiar los recursos del sitio.
+  CfnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${SiteStackName}-cfn-exec"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudformation.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: site-resources
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: SiteBucket
+                Effect: Allow
+                Action: s3:*
+                Resource:
+                  - !Sub "arn:aws:s3:::${DomainName}-site-${AWS::AccountId}"
+                  - !Sub "arn:aws:s3:::${DomainName}-site-${AWS::AccountId}/*"
+              - Sid: CloudFront
+                Effect: Allow
+                Action: cloudfront:*
+                Resource: "*"
+              - Sid: Certificates
+                Effect: Allow
+                Action: acm:*
+                Resource: "*"
+              - Sid: Dns
+                Effect: Allow
+                Action:
+                  - route53:GetHostedZone
+                  - route53:ListResourceRecordSets
+                  - route53:ChangeResourceRecordSets
+                Resource: !Sub "arn:aws:route53:::hostedzone/${HostedZoneId}"
+              - Sid: DnsRead
+                Effect: Allow
+                Action: [route53:GetChange, route53:ListHostedZones, route53:ListHostedZonesByName]
+                Resource: "*"
+              - Sid: OidcProvider
+                Effect: Allow
+                Action:
+                  - iam:GetOpenIDConnectProvider
+                  - iam:CreateOpenIDConnectProvider
+                  - iam:UpdateOpenIDConnectProviderThumbprint
+                  - iam:TagOpenIDConnectProvider
+                  - iam:UntagOpenIDConnectProvider
+                Resource: !Sub "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
+              - Sid: DeployRoleRead
+                Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:ListRolePolicies
+                  - iam:ListAttachedRolePolicies
+                  - iam:UpdateAssumeRolePolicy
+                  - iam:UpdateRole
+                  - iam:UpdateRoleDescription
+                  - iam:TagRole
+                  - iam:UntagRole
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                  - iam:DetachRolePolicy
+                Resource: !Sub "arn:aws:iam::${AWS::AccountId}:role/${SiteStackName}-github-deploy"
+              - Sid: DeployRoleWriteOnlyWithBoundary
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:PutRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:PutRolePermissionsBoundary
+                Resource: !Sub "arn:aws:iam::${AWS::AccountId}:role/${SiteStackName}-github-deploy"
+                Condition:
+                  StringEquals:
+                    iam:PermissionsBoundary: !Ref DeployRoleBoundary
+              - Sid: NeverRemoveBoundary
+                Effect: Deny
+                Action: iam:DeleteRolePermissionsBoundary
+                Resource: "*"
+
+  # Rol que asume GitHub Actions (solo rama main) para aplicar infra/cloudfront.yml.
+  # No toca recursos directamente: solo puede operar el stack y pasarle CfnExecutionRole.
+  InfraRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${SiteStackName}-github-infra"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepo}:ref:refs/heads/main"
+      Policies:
+        - PolicyName: operate-site-stack
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:ListChangeSets
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:GetTemplate
+                  - cloudformation:GetTemplateSummary
+                Resource:
+                  - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${SiteStackName}/*"
+                  - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:changeSet/*"
+              - Effect: Allow
+                Action: [cloudformation:ValidateTemplate, cloudformation:GetTemplateSummary]
+                Resource: "*"
+              - Effect: Allow
+                Action: iam:PassRole
+                Resource: !GetAtt CfnExecutionRole.Arn
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: cloudformation.amazonaws.com
+
+Outputs:
+  InfraRoleArn:
+    Value: !GetAtt InfraRole.Arn
+  CfnExecutionRoleArn:
+    Value: !GetAtt CfnExecutionRole.Arn
+  DeployRoleBoundaryArn:
+    Value: !Ref DeployRoleBoundary
