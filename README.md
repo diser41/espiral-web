@@ -136,7 +136,7 @@ La lectura con la etiqueta "La más pedida" es la que tiene la clase `destacado`
 
 ### Cambiar el número de WhatsApp
 
-El número aparece como texto y en los enlaces `https://wa.me/56964222825`. Busca `56964222825` y reemplaza **todas** las apariciones (enlaces), y luego busca `6422 2825` para el texto visible.
+El número aparece como texto y en los enlaces `https://wa.me/56949128852`. Busca `56949128852` y reemplaza **todas** las apariciones (enlaces), y luego busca `4912 8852` para el texto visible.
 
 En los enlaces el número va sin `+`, sin espacios y con el código de país (`56`).
 
