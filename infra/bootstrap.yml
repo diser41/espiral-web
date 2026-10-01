@@ -15,9 +15,11 @@ Parameters:
   HostedZoneId:
     Type: String
     Default: Z08065052K5ORA3XZXCN6
-  GitHubRepo:
+  # Prefijo del claim "sub" de GitHub. El repo usa el formato inmutable (usuario@id/repo@id):
+  # gh api repos/diser41/espiral-web/actions/oidc/customization/sub
+  GitHubSubjectPrefix:
     Type: String
-    Default: diser41/espiral-web
+    Default: repo:diser41@336637021/espiral-web@1400469697
   SiteStackName:
     Type: String
     Default: espiral-web
@@ -143,7 +145,7 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubRepo}:ref:refs/heads/main"
+                token.actions.githubusercontent.com:sub: !Sub "${GitHubSubjectPrefix}:ref:refs/heads/main"
       Policies:
         - PolicyName: operate-site-stack
           PolicyDocument:
